@@ -1,1 +1,1 @@
-# VWL - V Windowing Library
+# libvgui
