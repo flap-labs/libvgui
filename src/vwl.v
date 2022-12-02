@@ -1,5 +1,8 @@
 module main
+import window
 
 fn main() {
-	println('Hello World!')
+	win := window.create(1280, 720, "Testing VGUI")
+	window.run()
+	window.quit()
 }
