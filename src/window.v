@@ -2,7 +2,11 @@ module window
 
 $if windows {
 	#include "@VROOT/src/win32/window.c"
-	#flag -luser32 -lgdi32 -lkernel32
+	#include "@VROOT/src/win32/opengl.c"
+	#include "@VROOT/external/glad/glad.c"
+
+	#flag -luser32 -lgdi32 -lkernel32 -lopengl32
+	#flag -Iexternal
 }
 
 $if linux {

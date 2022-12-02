@@ -3,6 +3,9 @@
 #include <Windows.h>
 
 #include "include/window.h"
+#include "include/opengl.h"
+
+#include <glad/glad.h>
 
 // Globals
 HWND hwnd;
@@ -26,6 +29,8 @@ LRESULT CALLBACK wndproc(HWND window, UINT message, WPARAM wparam, LPARAM lparam
 // Creates a new Win32 window
 void win32_createWindow(unsigned int width, unsigned int height, const char *title)
 {
+  win32_initOpenGL();
+
   // Window class
   WNDCLASSEXA wc;
   wc.cbSize = sizeof(WNDCLASSEXA);
@@ -65,6 +70,9 @@ void win32_createWindow(unsigned int width, unsigned int height, const char *tit
 
   ShowWindow(hwnd, SW_SHOW);
   UpdateWindow(hwnd);
+
+  win32_createContext();
+  glViewport(0, 0, width, height); 
 }
 
 // Runs the application
@@ -78,6 +86,11 @@ void win32_run()
 
   while (GetMessageA(&msg, NULL, 0, 0) > 0)
   {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    win32_renderOpenGL();
+
     TranslateMessage(&msg);
     DispatchMessageA(&msg);
   }
@@ -89,4 +102,10 @@ void win32_run()
   }
 
   DestroyWindow(hwnd);
+}
+
+// Gets the Win32 window handle
+HWND win32_getHwnd()
+{
+  return hwnd;
 }
