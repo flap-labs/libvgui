@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include <gtk/gtk.h>
+#include <gtk/gtkx.h>
+
 #include "include/window.h"
 
 unsigned int width = 800;
@@ -37,4 +39,16 @@ void linux_createWindow(int w, int h, const char *t)
 void linux_run()
 {
   gtk_main();
+}
+
+// Gets the native X11 display handle
+Display *linux_getXDisplay()
+{
+  return gdk_x11_get_default_xdisplay();
+}
+
+// Gets the native X11 window handle
+Window linux_getXWindow()
+{
+  return gdk_x11_get_default_root_xwindow();
 }
