@@ -81,11 +81,7 @@ void win32_run()
     TranslateMessage(&msg);
     DispatchMessageA(&msg);
   }
-}
-
-// Quits the application and closes the window
-void win32_quit()
-{
+  
   if (hwnd == NULL)
   {
     printf("Error: Window already closed or an error occured.\n");

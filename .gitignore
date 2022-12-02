@@ -6,6 +6,7 @@ vwl
 *.so
 *.dylib
 *.dll
+libvgui
 
 # Ignore binary output folders
 bin/

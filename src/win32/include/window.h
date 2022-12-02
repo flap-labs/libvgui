@@ -8,6 +8,5 @@ void win32_changeTitle(const char *title);
 void win32_changeColorRGB(int r, int g, int b);
 
 void win32_run();
-void win32_quit();
 
 #endif
