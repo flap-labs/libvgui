@@ -26,6 +26,7 @@ $if linux {
 }
 
 fn C.win32_createWindow(width int, height int, title &char)
+fn C.win32_addUpdateFunction(update voidptr)
 fn C.win32_run()
 
 fn C.linux_createWindow(width int, height int, title &char)
@@ -61,6 +62,12 @@ pub fn create(width u32, height u32, title string) &Window {
 
 	$if windows {
 		C.win32_createWindow(int(width), int(height), title.str)
+
+		adjusted_update := fn [ref] () {
+			update(*ref)
+		}
+
+		C.win32_addUpdateFunction(adjusted_update)
 	}
 
 	$if linux {
