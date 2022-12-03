@@ -10,6 +10,7 @@
 // Globals
 HWND hwnd;
 MSG msg;
+void (*updateFunc)();
 
 // Win32 window procedure
 LRESULT CALLBACK wndproc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
@@ -89,6 +90,7 @@ void win32_run()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    updateFunc();
     win32_renderOpenGL();
 
     TranslateMessage(&msg);
@@ -102,6 +104,12 @@ void win32_run()
   }
 
   DestroyWindow(hwnd);
+}
+
+// Sets the update function for the window
+void win32_addUpdateFunction(void (*fn)())
+{
+  updateFunc = fn;
 }
 
 // Gets the Win32 window handle
