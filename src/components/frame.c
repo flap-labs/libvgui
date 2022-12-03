@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "include/frame.h"
+#include "../linux/include/window.h"
+
 #include <glad/glad.h>
 
 unsigned int shaderProgram, vao;
@@ -71,7 +73,9 @@ void frame_init()
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-  glm_ortho(0.0f, 1280.0f, 720.0f, 0.0f, -1.0f, 1.0f, projection);
+#ifdef __linux__
+  glm_ortho(0.0f, (float)linux_getWindowWidth(), (float)linux_getWindowHeight(), 0.0f, -1.0f, 1.0f, projection);
+#endif
 }
 
 // Draws each frame onto the screen

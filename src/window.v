@@ -30,6 +30,8 @@ fn C.win32_addUpdateFunction(update voidptr)
 fn C.win32_run()
 
 fn C.linux_createWindow(width int, height int, title &char)
+fn C.linux_changeWindowTitle(newTitle &char)
+fn C.linux_changeWindowColor(r int, g int, b int)
 fn C.linux_run()
 fn C.linux_addUpdateFunction(update voidptr)
 
@@ -50,8 +52,8 @@ fn update(window Window) {
 pub struct Window {
 	width u32
 	height u32
-	title string
 mut:
+	title string
 	frames []frame.Frame
 }
 
@@ -82,6 +84,22 @@ pub fn create(width u32, height u32, title string) &Window {
 
 	C.frame_init()
 	return ref
+}
+
+// Changes the window's titlebar text
+pub fn change_title(mut window &Window, newTitle string) {
+	(*window).title = newTitle
+	
+	$if linux {
+		C.linux_changeWindowTitle(newTitle.str)
+	}
+}
+
+// Changes the window's titlebar text
+pub fn change_background_color(r byte, g byte, b byte) {
+	$if linux {
+		C.linux_changeWindowColor(int(r), int(g), int(b))
+	}
 }
 
 // Adds a frame to the window's renderer

@@ -6,6 +6,9 @@ import frame
 fn main() {
 	mut win := window.create(1280, 720, "Testing VGUI")
 
+	window.change_background_color(30, 30, 30)
+	window.change_title(mut win, "VGUI")
+
 	mut f := frame.new(10, 10, 100, 100)
 	frame.change_color(mut f, 255, 0, 0)
 	window.add_frame(mut win, f)

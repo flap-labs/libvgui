@@ -15,11 +15,15 @@ char *title = "VGUI App";
 void (*updateFn)();
 int updateFnExists = 0;
 
+int r = 210;
+int g = 210;
+int b = 210;
+
 GtkWidget *gtkWindow;
 
 static gboolean tick(GtkWidget *widget, GdkFrameClock *clock, gpointer data)
 {
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(r/255.0f, g/255.0f, b/255.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
   if (updateFnExists == 1)
@@ -60,6 +64,21 @@ void linux_createWindow(int w, int h, const char *t)
   g_application_run(G_APPLICATION(app), 0, fakeArgv);
 }
 
+// Changes the title of the GTK window
+void linux_changeWindowTitle(const char *newTitle)
+{
+  title = newTitle;
+  gtk_window_set_title(gtkWindow, title);
+}
+
+// Changes the window's background color
+void linux_changeWindowColor(int red, int green, int blue)
+{
+  r = red;
+  g = green;
+  b = blue;
+}
+
 // Runs the GTK window
 void linux_run()
 {
@@ -71,6 +90,18 @@ void linux_addUpdateFunction(void (*update)())
 {
   updateFn = update;
   updateFnExists = 1;
+}
+
+// Gets the width of the GTK window
+int linux_getWindowWidth()
+{
+  return width;
+}
+
+// Gets the width of the GTK window
+int linux_getWindowHeight()
+{
+  return height;
 }
 
 // Gets the native X11 display handle
