@@ -1,5 +1,6 @@
 module cglm
 
+#flag -Iexternal/cglm/include
 #include "@VROOT/external/cglm/src/affine.c"
 #include "@VROOT/external/cglm/src/affine2d.c"
 #include "@VROOT/external/cglm/src/bezier.c"

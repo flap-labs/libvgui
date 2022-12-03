@@ -22,5 +22,5 @@ pub fn new(x int, y int, width int, height int) Frame {
 
 // Renders a frame object
 pub fn render(frame Frame) {
-	C.frame_draw(frame.cframe)
+	C.frame_draw(&frame.cframe)
 }

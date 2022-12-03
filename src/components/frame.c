@@ -6,6 +6,7 @@
 
 unsigned int shaderProgram, vao;
 int frameRendererInitialized = 0;
+mat4 projection;
 
 // Reads a GLSL source file and returns it as a `char *`
 char *readShaderSource(const char *filename)
@@ -69,6 +70,8 @@ void frame_init()
   // Vertex array object
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
+
+  glm_ortho(0.0f, 1280.0f, 720.0f, 0.0f, -1.0f, 1.0f, projection);
 }
 
 // Draws each frame onto the screen
@@ -76,6 +79,10 @@ void frame_render()
 {
   glUseProgram(shaderProgram);
   glBindVertexArray(vao);
+
+  // Apply projection matrix
+  int projectionLocation = glGetUniformLocation(shaderProgram, "projection");
+  glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projection[0]);
 }
 
 // Does any extra tasks the frame's renderer needs to do
@@ -128,11 +135,25 @@ Frame frame_new(int x, int y, int width, int height)
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+  glm_mat4_identity(frame.model);
   return frame;
 }
 
 // Draws the frame onto the renderer
-void frame_draw(Frame frame)
+void frame_draw(Frame *frame)
 {
+  // Calculate model matrix
+  glm_mat4_identity(frame->model);
+
+  vec3 translation = { (float)(frame->x + (frame->width / 2)), (float)(frame->y + (frame->height / 2)), 0.0f };
+  glm_translate(frame->model, translation);
+
+  vec3 scale = { (float)frame->width, (float)frame->height, 0.0f };
+  glm_scale(frame->model, scale);
+
+  // Apply model matrix
+  int modelLocation = glGetUniformLocation(shaderProgram, "model");
+  glUniformMatrix4fv(modelLocation, 1, GL_FALSE, frame->model[0]);
+
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
