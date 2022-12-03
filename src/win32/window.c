@@ -12,6 +12,10 @@ HWND hwnd;
 MSG msg;
 void (*updateFunc)();
 
+int r = 210;
+int g = 210;
+int b = 210;
+
 // Win32 window procedure
 LRESULT CALLBACK wndproc(HWND window, UINT message, WPARAM wparam, LPARAM lparam)
 {
@@ -73,7 +77,7 @@ void win32_createWindow(unsigned int width, unsigned int height, const char *tit
   UpdateWindow(hwnd);
 
   win32_createContext();
-  glViewport(0, 0, width, height); 
+  glViewport(0, height - win32_getHeight(), width, win32_getHeight()); 
 }
 
 // Runs the application
@@ -87,7 +91,7 @@ void win32_run()
 
   while (GetMessageA(&msg, NULL, 0, 0) > 0)
   {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(r/255.0f, g/255.0f, b/255.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     updateFunc();
@@ -106,10 +110,42 @@ void win32_run()
   DestroyWindow(hwnd);
 }
 
+// Changes the Win32 window's title
+void win32_changeWindowTitle(const char *newTitle)
+{
+  SetWindowTextA(hwnd, (LPCSTR)newTitle);
+}
+
+// Changes the Win32 window's background color
+void win32_changeWindowColor(int red, int green, int blue)
+{
+  r = red;
+  g = green;
+  b = blue;
+}
+
 // Sets the update function for the window
 void win32_addUpdateFunction(void (*fn)())
 {
   updateFunc = fn;
+}
+
+// Gets the width of the Win32 window
+int win32_getWidth()
+{
+  RECT rect;
+  GetClientRect(hwnd, &rect);
+
+  return rect.right - rect.left;
+}
+
+// Gets the height of the Win32 window
+int win32_getHeight()
+{
+  RECT rect;
+  GetClientRect(hwnd, &rect);
+
+  return rect.bottom - rect.top;
 }
 
 // Gets the Win32 window handle

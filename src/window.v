@@ -26,6 +26,8 @@ $if linux {
 }
 
 fn C.win32_createWindow(width int, height int, title &char)
+fn C.win32_changeWindowTitle(newTitle &char)
+fn C.win32_changeWindowColor(r int, g int, b int)
 fn C.win32_addUpdateFunction(update voidptr)
 fn C.win32_run()
 
@@ -90,6 +92,10 @@ pub fn create(width u32, height u32, title string) &Window {
 pub fn change_title(mut window &Window, newTitle string) {
 	(*window).title = newTitle
 	
+	$if windows {
+		C.win32_changeWindowTitle(newTitle.str)
+	}
+
 	$if linux {
 		C.linux_changeWindowTitle(newTitle.str)
 	}
@@ -97,6 +103,10 @@ pub fn change_title(mut window &Window, newTitle string) {
 
 // Changes the window's titlebar text
 pub fn change_background_color(r byte, g byte, b byte) {
+	$if windows {
+		C.win32_changeWindowColor(int(r), int(g), int(b))
+	}
+	
 	$if linux {
 		C.linux_changeWindowColor(int(r), int(g), int(b))
 	}

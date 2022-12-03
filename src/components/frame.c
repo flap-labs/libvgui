@@ -2,7 +2,12 @@
 #include <stdlib.h>
 
 #include "include/frame.h"
+
+#ifdef __linux__
 #include "../linux/include/window.h"
+#elif _WIN32
+#include "../win32/include/window.h"
+#endif
 
 #include <glad/glad.h>
 
@@ -75,6 +80,8 @@ void frame_init()
 
 #ifdef __linux__
   glm_ortho(0.0f, (float)linux_getWindowWidth(), (float)linux_getWindowHeight(), 0.0f, -1.0f, 1.0f, projection);
+#elif _WIN32
+  glm_ortho(0.0f, (float)win32_getWidth(), (float)win32_getHeight(), -(720.0f - (float)win32_getHeight()), -1.0f, 1.0f, projection);
 #endif
 }
 
