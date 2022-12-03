@@ -108,6 +108,10 @@ Frame frame_new(int x, int y, int width, int height)
   frame.width = width;
   frame.height = height;
 
+  frame.r = 255;
+  frame.g = 255;
+  frame.b = 255;
+
   // Vertex data
   float vertices[] =
   {
@@ -139,6 +143,14 @@ Frame frame_new(int x, int y, int width, int height)
   return frame;
 }
 
+// Changes the color of the provided frame component
+void frame_changeColor(Frame *frame, int r, int g, int b)
+{
+  frame->r = r;
+  frame->g = g;
+  frame->b = b;
+}
+
 // Draws the frame onto the renderer
 void frame_draw(Frame *frame)
 {
@@ -151,9 +163,16 @@ void frame_draw(Frame *frame)
   vec3 scale = { (float)frame->width, (float)frame->height, 0.0f };
   glm_scale(frame->model, scale);
 
+  // Calculate color vector
+  vec3 color = { (float)frame->r, (float)frame->g, (float)frame->b };
+
   // Apply model matrix
   int modelLocation = glGetUniformLocation(shaderProgram, "model");
   glUniformMatrix4fv(modelLocation, 1, GL_FALSE, frame->model[0]);
+
+  // Apply color vector
+  int colorLocation = glGetUniformLocation(shaderProgram, "color");
+  glUniform3fv(colorLocation, 1, color);
 
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
