@@ -4,7 +4,7 @@ import window
 import frame
 
 fn main() {
-	mut win := window.create(1280, 720, "Testing VGUI")
+	mut win := window.create(1280, 720, "Testing VGUI", window.WindowAttributes.window_frame_hidden)
 
 	window.change_background_color(30, 30, 30)
 	window.change_title(mut win, "VGUI")

@@ -14,6 +14,7 @@ unsigned int height = 600;
 char *title = "VGUI App";
 void (*updateFn)();
 int updateFnExists = 0;
+int windowFrameVisible = 1;
 
 int r = 210;
 int g = 210;
@@ -41,9 +42,9 @@ static void onActivate(GtkApplication *app)
   gtkWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_default_size(GTK_WINDOW(gtkWindow), width, height);
   gtk_window_set_title(GTK_WINDOW(gtkWindow), title);
+  gtk_window_set_decorated(GTK_WINDOW(gtkWindow), windowFrameVisible);
 
   gtk_widget_show_all(gtkWindow);
-
   linux_createContext();
 
   g_signal_connect(gtkWindow, "destroy", gtk_main_quit, NULL);
@@ -51,11 +52,13 @@ static void onActivate(GtkApplication *app)
 }
 
 // Creates a new Linux GTK window
-void linux_createWindow(int w, int h, const char *t)
+void linux_createWindow(int w, int h, const char *t, int frameVisible)
 {
   width = w;
   height = h;
   title = t;
+
+  windowFrameVisible = frameVisible;
 
   GtkApplication *app = gtk_application_new("com.test.test", G_APPLICATION_FLAGS_NONE);
   g_signal_connect(app, "activate", G_CALLBACK(onActivate), NULL);

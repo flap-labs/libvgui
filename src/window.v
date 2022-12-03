@@ -31,7 +31,7 @@ fn C.win32_changeWindowColor(r int, g int, b int)
 fn C.win32_addUpdateFunction(update voidptr)
 fn C.win32_run()
 
-fn C.linux_createWindow(width int, height int, title &char)
+fn C.linux_createWindow(width int, height int, title &char, frameVisible int)
 fn C.linux_changeWindowTitle(newTitle &char)
 fn C.linux_changeWindowColor(r int, g int, b int)
 fn C.linux_run()
@@ -40,6 +40,11 @@ fn C.linux_addUpdateFunction(update voidptr)
 fn C.frame_init()
 fn C.frame_render()
 fn C.frame_finalize()
+
+pub enum WindowAttributes as u8 {
+	window_frame_visible
+	window_frame_hidden
+}
 
 // Local update function
 fn update(window Window) {
@@ -60,7 +65,7 @@ mut:
 }
 
 // Creates a new window with the specified size and title
-pub fn create(width u32, height u32, title string) &Window {
+pub fn create(width u32, height u32, title string, attribs WindowAttributes) &Window {
 	mut win := Window { width, height, title, []frame.Frame{} }
 	mut ref := &win
 
@@ -75,7 +80,13 @@ pub fn create(width u32, height u32, title string) &Window {
 	}
 
 	$if linux {
-		C.linux_createWindow(int(width), int(height), title.str)
+		if attribs == WindowAttributes.window_frame_visible {
+			C.linux_createWindow(int(width), int(height), title.str, int(true))
+		}
+
+		if attribs == WindowAttributes.window_frame_hidden {
+			C.linux_createWindow(int(width), int(height), title.str, int(false))
+		}
 
 		adjusted_update := fn [ref] () {
 			update(*ref)
