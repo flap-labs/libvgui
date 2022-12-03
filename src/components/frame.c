@@ -119,9 +119,9 @@ Frame frame_new(int x, int y, int width, int height)
   frame.width = width;
   frame.height = height;
 
-  frame.r = 255;
-  frame.g = 255;
-  frame.b = 255;
+  frame.r = 140;
+  frame.g = 140;
+  frame.b = 140;
 
   // Vertex data
   float vertices[] =
