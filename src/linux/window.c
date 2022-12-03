@@ -12,6 +12,8 @@
 unsigned int width = 800;
 unsigned int height = 600;
 char *title = "VGUI App";
+void (*updateFn)();
+int updateFnExists = 0;
 
 GtkWidget *gtkWindow;
 
@@ -19,6 +21,11 @@ static gboolean tick(GtkWidget *widget, GdkFrameClock *clock, gpointer data)
 {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+
+  if (updateFnExists == 1)
+  {
+    updateFn();
+  }
 
   linux_renderOpenGL();
   return TRUE;
@@ -57,6 +64,13 @@ void linux_createWindow(int w, int h, const char *t)
 void linux_run()
 {
   gtk_main();
+}
+
+// Adds a function that gets called every frame
+void linux_addUpdateFunction(void (*update)())
+{
+  updateFn = update;
+  updateFnExists = 1;
 }
 
 // Gets the native X11 display handle

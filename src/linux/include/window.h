@@ -6,6 +6,7 @@
 
 void linux_createWindow(int width, int height, const char *title);
 void linux_run();
+void linux_addUpdateFunction(void (*update)());
 
 Display *linux_getXDisplay();
 Window linux_getXWindow();

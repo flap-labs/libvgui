@@ -58,8 +58,6 @@ void linux_createContext()
 
   glXMakeCurrent(display, window, context);
   gladLoadGL();
-
-  printf("GL version: \"%s\"\n", glGetString(GL_VERSION));
 }
 
 // Renders everything to the screen

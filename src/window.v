@@ -1,4 +1,7 @@
 module window
+import frame
+
+#include "@VROOT/src/components/frame.c"
 
 $if windows {
 	#include "@VROOT/src/win32/window.c"
@@ -27,29 +30,62 @@ fn C.win32_run()
 
 fn C.linux_createWindow(width int, height int, title &char)
 fn C.linux_run()
+fn C.linux_addUpdateFunction(update voidptr)
+
+fn C.frame_init()
+fn C.frame_render()
+fn C.frame_finalize()
+
+// Local update function
+fn update(window Window) {
+	C.frame_render()
+	
+	for f in window.frames {
+		frame.render(f)
+	}
+}
 
 // A struct representing a cross platform window
 pub struct Window {
 	width u32
 	height u32
 	title string
+mut:
+	frames []frame.Frame
 }
 
 // Creates a new window with the specified size and title
-pub fn create(width u32, height u32, title string) Window {
+pub fn create(width u32, height u32, title string) &Window {
+	mut win := Window { width, height, title, []frame.Frame{} }
+	mut ref := &win
+
 	$if windows {
 		C.win32_createWindow(int(width), int(height), title.str)
 	}
 
 	$if linux {
 		C.linux_createWindow(int(width), int(height), title.str)
+
+		adjusted_update := fn [ref] () {
+			update(*ref)
+		}
+
+		C.linux_addUpdateFunction(adjusted_update)
 	}
 
-	return Window { width, height, title }
+	C.frame_init()
+	return ref
+}
+
+// Adds a frame to the window's renderer
+pub fn add_frame(mut window &Window, frame frame.Frame) {
+	window.frames.insert((*window).frames.len, frame)
 }
 
 // Runs the window
 pub fn run() {
+	C.frame_finalize()
+
 	$if windows {
 		C.win32_run()
 	}
