@@ -1,7 +1,10 @@
 module window
+
 import frame
+import image
 
 #include "@VROOT/src/components/frame.c"
+#include "@VROOT/src/components/image.c"
 
 $if windows {
 	#include "@VROOT/src/win32/window.c"
@@ -37,9 +40,11 @@ fn C.linux_changeWindowColor(r int, g int, b int)
 fn C.linux_run()
 fn C.linux_addUpdateFunction(update voidptr)
 
-fn C.frame_init()
 fn C.frame_render()
 fn C.frame_finalize()
+
+fn C.image_render()
+fn C.image_finalize()
 
 pub enum WindowAttributes as u8 {
 	window_frame_visible
@@ -49,9 +54,13 @@ pub enum WindowAttributes as u8 {
 // Local update function
 fn update(window Window) {
 	C.frame_render()
-	
 	for f in window.frames {
 		frame.render(f)
+	}
+
+	C.image_render()
+	for i in window.images {
+		image.image_render(i)
 	}
 }
 
@@ -62,11 +71,12 @@ pub struct Window {
 mut:
 	title string
 	frames []frame.Frame
+	images []image.Image
 }
 
 // Creates a new window with the specified size and title
 pub fn create(width u32, height u32, title string, attribs WindowAttributes) &Window {
-	mut win := Window { width, height, title, []frame.Frame{} }
+	mut win := Window { width, height, title, []frame.Frame{}, []image.Image{} }
 	mut ref := &win
 
 	$if windows {
@@ -95,7 +105,6 @@ pub fn create(width u32, height u32, title string, attribs WindowAttributes) &Wi
 		C.linux_addUpdateFunction(adjusted_update)
 	}
 
-	C.frame_init()
 	return ref
 }
 
@@ -128,9 +137,15 @@ pub fn add_frame(mut window &Window, frame frame.Frame) {
 	window.frames.insert((*window).frames.len, frame)
 }
 
+// Adds an image to the window's renderer
+pub fn add_image(mut window &Window, image image.Image) {
+	window.images.insert((*window).images.len, image)
+}
+
 // Runs the window
-pub fn run() {
+pub fn run(window &Window) {
 	C.frame_finalize()
+	C.image_finalize()
 
 	$if windows {
 		C.win32_run()

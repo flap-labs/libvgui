@@ -11,12 +11,12 @@
 
 #include <glad/glad.h>
 
-unsigned int shaderProgram, vao;
+unsigned int frameShaderProgram, frameVao, frameVbo;
 int frameRendererInitialized = 0;
 mat4 projection;
 
 // Reads a GLSL source file and returns it as a `char *`
-char *readShaderSource(const char *filename)
+char *frame_readShaderSource(const char *filename)
 {
   FILE *file = fopen(filename, "rb");
   
@@ -38,67 +38,22 @@ char *readShaderSource(const char *filename)
   return str;
 }
 
-// Initialzies the rendering of frames
-void frame_init()
-{
-  // Check to make sure we haven't already initialized rendering
-  if (frameRendererInitialized == 1)
-  {
-    printf("Error: Frame renderer initialized twice.\n");
-    exit(1);
-  }
-
-  frameRendererInitialized = 1;
-
-  // Read shader sources
-  char *vertexShaderSource = readShaderSource("src/shaders/frame/shader.vert");
-  char *fragmentShaderSource = readShaderSource("src/shaders/frame/shader.frag");
-
-  // Shaders
-  unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
-
-  unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
-
-  // Shader program
-  shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-
-  glLinkProgram(shaderProgram);
-
-  // Delete shaders we don't need anymore
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
-
-  // Vertex array object
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-
-#ifdef __linux__
-  glm_ortho(0.0f, (float)linux_getWindowWidth(), (float)linux_getWindowHeight(), 0.0f, -1.0f, 1.0f, projection);
-#elif _WIN32
-  glm_ortho(0.0f, (float)win32_getWidth(), (float)win32_getHeight(), -(720.0f - (float)win32_getHeight()), -1.0f, 1.0f, projection);
-#endif
-}
-
 // Draws each frame onto the screen
 void frame_render()
 {
-  glUseProgram(shaderProgram);
-  glBindVertexArray(vao);
+  glUseProgram(frameShaderProgram);
 
   // Apply projection matrix
-  int projectionLocation = glGetUniformLocation(shaderProgram, "projection");
+  int projectionLocation = glGetUniformLocation(frameShaderProgram, "projection");
   glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, projection[0]);
 }
 
 // Does any extra tasks the frame's renderer needs to do
 void frame_finalize()
 {
+  glBindVertexArray(frameVao);
+  glBindBuffer(GL_ARRAY_BUFFER, frameVbo);
+
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 }
@@ -106,12 +61,6 @@ void frame_finalize()
 // Creates a new frame object
 Frame frame_new(int x, int y, int width, int height)
 {
-  if (frameRendererInitialized == 0)
-  {
-    printf("Error: Failed to render a frame. Create a window first.\n");
-    exit(1);
-  } 
-
   Frame frame;
 
   frame.x = x;
@@ -139,10 +88,52 @@ Frame frame_new(int x, int y, int width, int height)
     1, 2, 3
   };
 
+  // VAO
+  glGenVertexArrays(1, &frameVao);
+  glBindVertexArray(frameVao);
+
+  if (frameRendererInitialized == 0)
+  {
+    frameRendererInitialized = 1;
+
+    // Read shader sources
+    char *vertexShaderSource = frame_readShaderSource("src/shaders/frame/shader.vert");
+    char *fragmentShaderSource = frame_readShaderSource("src/shaders/frame/shader.frag");
+
+    // Shaders
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    // Shader program
+    frameShaderProgram = glCreateProgram();
+    glAttachShader(frameShaderProgram, vertexShader);
+    glAttachShader(frameShaderProgram, fragmentShader);
+
+    glLinkProgram(frameShaderProgram);
+
+    // Delete shaders we don't need anymore
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    // Vertex array object
+    glGenVertexArrays(1, &frameVao);
+    glBindVertexArray(frameVao);
+
+  #ifdef __linux__
+    glm_ortho(0.0f, (float)linux_getWindowWidth(), (float)linux_getWindowHeight(), 0.0f, -1.0f, 1.0f, projection);
+  #elif _WIN32
+    glm_ortho(0.0f, (float)win32_getWidth(), (float)win32_getHeight(), -(720.0f - (float)win32_getHeight()), -1.0f, 1.0f, projection);
+  #endif
+  }
+
   // OpenGL buffers
-  unsigned int vbo;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glGenBuffers(1, &frameVbo);
+  glBindBuffer(GL_ARRAY_BUFFER, frameVbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   unsigned int ebo;
@@ -178,12 +169,14 @@ void frame_draw(Frame *frame)
   vec3 color = { (float)frame->r, (float)frame->g, (float)frame->b };
 
   // Apply model matrix
-  int modelLocation = glGetUniformLocation(shaderProgram, "model");
+  int modelLocation = glGetUniformLocation(frameShaderProgram, "model");
   glUniformMatrix4fv(modelLocation, 1, GL_FALSE, frame->model[0]);
 
   // Apply color vector
-  int colorLocation = glGetUniformLocation(shaderProgram, "color");
+  int colorLocation = glGetUniformLocation(frameShaderProgram, "color");
   glUniform3fv(colorLocation, 1, color);
 
+  glBindVertexArray(frameVao);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  glBindVertexArray(0);
 }

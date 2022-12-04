@@ -11,7 +11,6 @@ typedef struct
   mat4 model;
 } Frame;
 
-void frame_init();
 void frame_render();
 void frame_finalize();
 
