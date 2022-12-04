@@ -15,6 +15,13 @@ $if windows {
 	#flag -Iexternal
 }
 
+$if macos {
+	#include "@VROOT/src/macos/window.m"
+	#include "@VROOT/external/glad/glad.c"
+	#flag -framework Foundation -framework Cocoa
+	#flag -Iexternal
+}
+
 $if linux {
 	#include "@VROOT/src/linux/window.c"
 	#include "@VROOT/src/linux/opengl.c"
@@ -34,6 +41,9 @@ fn C.win32_changeWindowColor(r int, g int, b int)
 fn C.win32_addUpdateFunction(update voidptr)
 fn C.win32_run()
 
+fn C.macos_createWindow(width int, height int, title &char)
+fn C.macos_run()
+
 fn C.linux_createWindow(width int, height int, title &char, frameVisible int)
 fn C.linux_changeWindowTitle(newTitle &char)
 fn C.linux_changeWindowColor(r int, g int, b int)
@@ -46,7 +56,7 @@ fn C.frame_finalize()
 fn C.image_render()
 fn C.image_finalize()
 
-pub enum WindowAttributes as u8 {
+pub enum WindowAttributes {
 	window_frame_visible
 	window_frame_hidden
 }
@@ -87,6 +97,10 @@ pub fn create(width u32, height u32, title string, attribs WindowAttributes) &Wi
 		}
 
 		C.win32_addUpdateFunction(adjusted_update)
+	}
+
+	$if macos {
+		C.macos_createWindow(int(width), int(height), title.str)
 	}
 
 	$if linux {
@@ -144,11 +158,15 @@ pub fn add_image(mut window &Window, image image.Image) {
 
 // Runs the window
 pub fn run(window &Window) {
-	C.frame_finalize()
-	C.image_finalize()
+	// C.frame_finalize()
+	// C.image_finalize()
 
 	$if windows {
 		C.win32_run()
+	}
+
+	$if macos {
+		C.macos_run()
 	}
 
 	$if linux {
