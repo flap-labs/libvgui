@@ -6,8 +6,9 @@ fn C.frame_changeColor(frame C.Frame, r int, g int, b int)
 
 // The frame widget
 pub struct Frame {
+mut:
 	cframe C.Frame
-pub:
+pub mut:
 	x int
 	y int
 	width int
@@ -19,6 +20,22 @@ pub fn new(x int, y int, width int, height int) Frame {
 	cframe := C.frame_new(x, y, width, height)
 	frame := Frame { cframe, x, y, width, height }
 	return frame
+}
+
+// Changes the position of the frame
+pub fn change_pos(mut frame Frame, x int, y int) {
+	frame.x = x
+	frame.y = y
+	frame.cframe.x = voidptr(x)
+	frame.cframe.y = voidptr(y)
+}
+
+// Changes the size of the frame
+pub fn change_size(mut frame Frame, width int, height int) {
+	frame.width = width
+	frame.height = height
+	frame.cframe.width = voidptr(width)
+	frame.cframe.height = voidptr(height)
 }
 
 // Changes the color of the frame

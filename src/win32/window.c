@@ -77,7 +77,7 @@ void win32_createWindow(unsigned int width, unsigned int height, const char *tit
   UpdateWindow(hwnd);
 
   win32_createContext();
-  glViewport(0, height - win32_getHeight(), width, win32_getHeight()); 
+  glViewport(0, 0, width, height); 
 }
 
 // Runs the application

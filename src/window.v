@@ -2,6 +2,7 @@ module window
 
 import frame
 import image
+import flex
 
 #include "@VROOT/src/components/frame.c"
 #include "@VROOT/src/components/image.c"
@@ -72,21 +73,27 @@ fn update(window Window) {
 	for i in window.images {
 		image.image_render(i)
 	}
+
+	for i in window.flexboxes {
+		flex.render(i)
+	}
 }
 
 // A struct representing a cross platform window
 pub struct Window {
+pub:
 	width u32
 	height u32
 mut:
 	title string
 	frames []frame.Frame
 	images []image.Image
+	flexboxes []flex.Flexbox
 }
 
 // Creates a new window with the specified size and title
 pub fn create(width u32, height u32, title string, attribs WindowAttributes) &Window {
-	mut win := Window { width, height, title, []frame.Frame{}, []image.Image{} }
+	mut win := Window { width, height, title, []frame.Frame{}, []image.Image{}, []flex.Flexbox{} }
 	mut ref := &win
 
 	$if windows {
@@ -156,10 +163,15 @@ pub fn add_image(mut window &Window, image image.Image) {
 	window.images.insert((*window).images.len, image)
 }
 
+// Adds a flexbox to the window's renderer
+pub fn add_flexbox(mut window &Window, flexbox flex.Flexbox) {
+	window.flexboxes.insert((*window).flexboxes.len, flexbox)
+}
+
 // Runs the window
 pub fn run(window &Window) {
-	// C.frame_finalize()
-	// C.image_finalize()
+	C.frame_finalize()
+	C.image_finalize()
 
 	$if windows {
 		C.win32_run()
